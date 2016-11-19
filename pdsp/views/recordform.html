@@ -1,0 +1,288 @@
+<div style="width:4000px;overflow:auto">
+{% if edit: %}
+Enable/Disable Autosave <input type="checkbox" checked onclick="disable(this)">
+<p id="autosave">Auto save in 60s ...</p>
+{% if copy>0: %}
+<form method="post">
+	Copy from
+	<select name="version">
+		{% for each in select: %}
+  		<option value="{{each[0]}}">{{each[1]}} {{each[0]}}</option>
+  		{% endfor %}
+	</select>
+	<input type="submit" name="submit" value="Copy">
+</form>
+{% endif %}
+<form method="post">
+<input type="text" name="filename" value="{{filename}}" style="font-size:1.25em;">
+<p></p>
+<table id="table" border="1">
+<tr>
+	<th rowspan="2">Insert Op.</th>
+	<th rowspan="2">Delete Op.</th>
+	<th rowspan="2">Serial No.</th>
+	<th rowspan="2">Part ID No.</th>
+	<th rowspan="2">Table No.</th>
+	<th rowspan="2">Fixture No.</th>
+	<th rowspan="2">Inner shroud/outer shroud</th>
+	<th colspan="2">Slot depth (mm)</th>
+	<th colspan="2">Slot width</th>
+	<th colspan="2">Position</th>
+	<th rowspan="2">Milling cutter change</th>
+	<th rowspan="2">Offset</th>
+	<th rowspan="2">Operator</th>
+	<th rowspan="2">Date</th>
+	<th rowspan="2">Remark</th>
+</tr>
+<tr>
+	<th>Norminal Dim.</th>
+	<th>Actual Dim.</th>
+	<th>Norminal Dim. min:12.0</th>
+	<th>Norminal Dim. max:12.1</th>
+	<th>GO</th>
+	<th>NO GO</th>
+</tr>
+	{% if infos: %}
+		{% for info in infos: %}
+		<tr id="Op{{info[19]}}Outer{{info[17]}}">
+			{% if info[17]: %}
+			<td rowspan="2"><input type="button" value="+" onclick="addOp({{info[19]}})"></td>
+			{% if info[19]!=0: %}
+			<td rowspan="2"><input type="button" value="-" onclick="deleteOp({{info[19]}})"></td>
+			{% else: %}
+			<td rowspan="2"></td>
+			{% endif %}
+			<td rowspan="2">{{info[2]}}</td>
+			<td rowspan="2"><textarea name="partid[{{info[19]}}]" rows="4" cols="5">{{info[3]}}</textarea></td>
+			<td rowspan="2"><textarea name="tableno[{{info[19]}}]" rows="4" cols="5">{{info[4]}}</textarea></td>
+			<td rowspan="2"><textarea name="fixture[{{info[19]}}]" rows="4" cols="5">{{info[5]}}</textarea></td>
+			<td>Outer shroud</td>
+			{% else: %}
+			<td>Inner shroud</td>
+			{% endif %}
+			<td><textarea name="depthnominal[{{info[19]}}]" rows="2" cols="10">{{info[6]}}</textarea></td>
+			<td><textarea name="depthactual[{{info[19]}}]" rows="2" cols="10">{{info[7]}}</textarea></td>
+			<td><input type="checkbox" name="widthmin[{{info[19]}}]" {% if info[8]: %}checked{% endif %}>Yes</td>
+			<td><input type="checkbox" name="widthmax[{{info[19]}}]" {% if info[9]: %}checked{% endif %}>Yes</td>
+			<td><input type="checkbox" name="go[{{info[19]}}]" {% if info[10]: %}checked{% endif %}>Yes</td>
+			<td><input type="checkbox" name="nogo[{{info[19]}}]" {% if info[11]: %}checked{% endif %}>Yes</td>
+			{% if info[17]: %}
+			<td rowspan="2"><input type="checkbox" name="cutterchange[{{info[19]}}]" {% if info[12]: %}checked{% endif %}>Yes</td>
+			<td rowspan="2"><input type="checkbox" name="offset[{{info[19]}}]" {% if info[13]: %}checked{% endif %}>Yes</td>
+			<td rowspan="2"><textarea name="operator[{{info[19]}}]" rows="4" cols="5">{{info[14]}}</textarea></td>
+			<td rowspan="2"><textarea name="opdate[{{info[19]}}]" rows="4" cols="5">{{info[15]}}</textarea></td>
+			<td rowspan="2"><textarea name="remark[{{info[19]}}]" rows="4" cols="30">{{info[16]}}</textarea></td>
+			{% endif %}
+			<input type="hidden" name="outerinner[{{info[19]}}]" value={{info[17]}}>
+			<input type="hidden" name="ops" value={{info[19]}}>
+		</tr>
+		{% endfor %}
+	{% else: %}
+		<tr id="Op0Outer1">
+			<td rowspan="2"><input type="button" value="+" onclick="addOp(0)"></td>
+			<td rowspan="2"></td>
+			<td rowspan="2"></td>
+			<td rowspan="2"><textarea name="partid[0]" rows="4" cols="5"></textarea></td>
+			<td rowspan="2"><textarea name="tableno[0]" rows="4" cols="5"></textarea></td>
+			<td rowspan="2"><textarea name="fixture[0]" rows="4" cols="5"></textarea></td>
+			<td>Outer shroud</td>
+			<td><textarea name="depthnominal[0]" rows="2" cols="10"></textarea></td>
+			<td><textarea name="depthactual[0]" rows="2" cols="10"></textarea></td>
+			<td><input type="checkbox" name="widthmin[0]">Yes</td>
+			<td><input type="checkbox" name="widthmax[0]">Yes</td>
+			<td><input type="checkbox" name="go[0]">Yes</td>
+			<td><input type="checkbox" name="nogo[0]">Yes</td>
+			<td rowspan="2"><input type="checkbox" name="cutterchange[0]">Yes</td>
+			<td rowspan="2"><input type="checkbox" name="offset[0]">Yes</td>
+			<td rowspan="2"><textarea name="operator[0]" rows="4" cols="5"></textarea></td>
+			<td rowspan="2"><textarea name="opdate[0]" rows="4" cols="5"></textarea></td>
+			<td rowspan="2"><textarea name="remark[0]" rows="4" cols="30"></textarea></td>
+			<input type="hidden" name="outerinner[0]" value=1>
+			<input type="hidden" name="ops" value=0>
+		</tr>
+		<tr id="Op1Outer0">
+			<td>Inner shroud</td>
+			<td><textarea name="depthnominal[1]" rows="2" cols="10"></textarea></td>
+			<td><textarea name="depthactual[1]" rows="2" cols="10"></textarea></td>
+			<td><input type="checkbox" name="widthmin[1]">Yes</td>
+			<td><input type="checkbox" name="widthmax[1]">Yes</td>
+			<td><input type="checkbox" name="go[1]">Yes</td>
+			<td><input type="checkbox" name="nogo[1]">Yes</td>
+			<input type="hidden" name="outerinner[1]" value=0>
+			<input type="hidden" name="ops" value=1>
+		</tr>
+	{% endif %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'recordform')" value="Export to Excel">
+<input id="save" type="submit" name="submit" value="Save">
+<input type="submit" name="submit" value="Save and Close">
+</form>
+{% else: %}
+<h2>{{filename}}</h2>
+<p></p>
+<table id="table" border="1">
+<tr>
+	<th rowspan="2">Serial No.</th>
+	<th rowspan="2">Part ID No.</th>
+	<th rowspan="2">Table No.</th>
+	<th rowspan="2">Fixture No.</th>
+	<th rowspan="2">Inner shroud/outer shroud</th>
+	<th colspan="2">Slot depth (mm)</th>
+	<th colspan="2">Slot width</th>
+	<th colspan="2">Position</th>
+	<th rowspan="2">Milling cutter change</th>
+	<th rowspan="2">Offset</th>
+	<th rowspan="2">Operator</th>
+	<th rowspan="2">Date</th>
+	<th rowspan="2">Remark</th>
+</tr>
+<tr>
+	<th>Norminal Dim.</th>
+	<th>Actual Dim.</th>
+	<th>Norminal Dim. min:12.0</th>
+	<th>Norminal Dim. max:12.1</th>
+	<th>GO</th>
+	<th>NO GO</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[19]}}Outer{{info[17]}}">
+		{% if info[17]: %}
+		<td rowspan="2">{{info[2]}}</td>
+		<td rowspan="2">{{info[3]}}</td>
+		<td rowspan="2">{{info[4]}}</td>
+		<td rowspan="2">{{info[5]}}</td>
+		<td>Outer shroud</td>
+		{% else: %}
+		<td>Inner shroud</td>
+		{% endif %}
+		<td>{{info[6]}}</td>
+		<td>{{info[7]}}</td>
+		<td><input disabled type="checkbox" name="widthmin[{{info[19]}}]" {% if info[8]: %}checked{% endif %}>Yes</td>
+		<td><input disabled type="checkbox" name="widthmax[{{info[19]}}]" {% if info[9]: %}checked{% endif %}>Yes</td>
+		<td><input disabled type="checkbox" name="go[{{info[19]}}]" {% if info[10]: %}checked{% endif %}>Yes</td>
+		<td><input disabled type="checkbox" name="nogo[{{info[19]}}]" {% if info[11]: %}checked{% endif %}>Yes</td>
+		{% if info[17]: %}
+		<td rowspan="2"><input disabled type="checkbox" name="cutterchange[{{info[19]}}]" {% if info[12]: %}checked{% endif %}>Yes</td>
+		<td rowspan="2"><input disabled type="checkbox" name="offset[{{info[19]}}]" {% if info[13]: %}checked{% endif %}>Yes</td>
+		<td rowspan="2">{{info[14]}}</td>
+		<td rowspan="2">{{info[15]}}</td>
+		<td rowspan="2">{{info[16]}}</td>
+		{% endif %}
+	</tr>
+	{% endfor %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'recordform')" value="Export to Excel">
+{% endif %}
+</div>
+
+<table hidden id="export" border="1">
+<tr>
+	<th rowspan="2">Serial No.</th>
+	<th rowspan="2">Part ID No.</th>
+	<th rowspan="2">Table No.</th>
+	<th rowspan="2">Fixture No.</th>
+	<th rowspan="2">Inner shroud/outer shroud</th>
+	<th colspan="2">Slot depth (mm)</th>
+	<th colspan="2">Slot width</th>
+	<th colspan="2">Position</th>
+	<th rowspan="2">Milling cutter change</th>
+	<th rowspan="2">Offset</th>
+	<th rowspan="2">Operator</th>
+	<th rowspan="2">Date</th>
+	<th rowspan="2">Remark</th>
+</tr>
+<tr>
+	<th>Norminal Dim.</th>
+	<th>Actual Dim.</th>
+	<th>Norminal Dim. min:12.0</th>
+	<th>Norminal Dim. max:12.1</th>
+	<th>GO</th>
+	<th>NO GO</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[19]}}Outer{{info[17]}}">
+		{% if info[17]: %}
+		<td rowspan="2">{{info[2]}}</td>
+		<td rowspan="2">{{info[3]}}</td>
+		<td rowspan="2">{{info[4]}}</td>
+		<td rowspan="2">{{info[5]}}</td>
+		<td>Outer shroud</td>
+		{% else: %}
+		<td>Inner shroud</td>
+		{% endif %}
+		<td>{{info[6]}}</td>
+		<td>{{info[7]}}</td>
+		<td><input disabled type="checkbox" name="widthmin[{{info[19]}}]" {% if info[8]: %}checked{% endif %}>Yes</td>
+		<td><input disabled type="checkbox" name="widthmax[{{info[19]}}]" {% if info[9]: %}checked{% endif %}>Yes</td>
+		<td><input disabled type="checkbox" name="go[{{info[19]}}]" {% if info[10]: %}checked{% endif %}>Yes</td>
+		<td><input disabled type="checkbox" name="nogo[{{info[19]}}]" {% if info[11]: %}checked{% endif %}>Yes</td>
+		{% if info[17]: %}
+		<td rowspan="2"><input disabled type="checkbox" name="cutterchange[{{info[19]}}]" {% if info[12]: %}checked{% endif %}>Yes</td>
+		<td rowspan="2"><input disabled type="checkbox" name="offset[{{info[19]}}]" {% if info[13]: %}checked{% endif %}>Yes</td>
+		<td rowspan="2">{{info[14]}}</td>
+		<td rowspan="2">{{info[15]}}</td>
+		<td rowspan="2">{{info[16]}}</td>
+		{% endif %}
+	</tr>
+	{% endfor %}
+</table>
+
+<script>
+var counter = {{len}};
+var time = 60;
+var autosave = 1;
+window.onload=function() {
+	if ({{close}}) window.close();
+	{% if edit: %} setInterval(tip, 1000); {% endif %}
+}
+function disable(element){
+	if (element.checked) {
+		autosave = 1;
+		time = 60;
+	}
+	else autosave = 0;
+}
+function tip(){
+	if (autosave){
+	time -= 1;
+	document.getElementById("autosave").innerHTML='Auto save in '+time+'s ...';
+	if (time==0) document.getElementById("save").click();
+	}
+	else document.getElementById("autosave").innerHTML='';
+}
+function addOp(ops) {
+	if (counter==0) counter=2;
+	else counter+=1;
+	var id='Op'+ops+'Outer1';
+	var orow=document.getElementById(id);
+	var nrow=document.getElementById('table').insertRow(orow.rowIndex+2);
+	nrow.id='Op'+counter+'Outer1';
+	nrow.innerHTML='<td rowspan="2"><input type="button" value="+" onclick="addOp('+counter+')"></td><td rowspan="2"><input type="button" value="-" onclick="deleteOp('+counter+')"></td><td rowspan="2"></td><td rowspan="2"><textarea name="partid['+counter+']" rows="4" cols="5"></textarea></td><td rowspan="2"><textarea name="tableno['+counter+']" rows="4" cols="5"></textarea></td><td rowspan="2"><textarea name="fixture['+counter+']" rows="4" cols="5"></textarea></td><td>Outer shroud</td><td><textarea name="depthnominal['+counter+']" rows="2" cols="10"></textarea></td><td><textarea name="depthactual['+counter+']" rows="2" cols="10"></textarea></td><td><input type="checkbox" name="widthmin['+counter+']">Yes</td><td><input type="checkbox" name="widthmax['+counter+']">Yes</td><td><input type="checkbox" name="go['+counter+']">Yes</td><td><input type="checkbox" name="nogo['+counter+']">Yes</td><td rowspan="2"><input type="checkbox" name="cutterchange['+counter+']">Yes</td><td rowspan="2"><input type="checkbox" name="offset['+counter+']">Yes</td><td rowspan="2"><textarea name="operator['+counter+']" rows="4" cols="5"></textarea></td><td rowspan="2"><textarea name="opdate['+counter+']" rows="4" cols="5"></textarea></td><td rowspan="2"><textarea name="remark['+counter+']" rows="4" cols="30"></textarea></td><input type="hidden" name="outerinner['+counter+']" value=1><input type="hidden" name="ops" value='+counter+'>';
+	counter+=1;
+	var nrow2=document.getElementById('table').insertRow(orow.rowIndex+3);
+	nrow2.id='Op'+counter+'Outer0';
+	nrow2.innerHTML='<td>Inner shroud</td><td><textarea name="depthnominal['+counter+']" rows="2" cols="10"></textarea></td><td><textarea name="depthactual['+counter+']" rows="2" cols="10"></textarea></td><td><input type="checkbox" name="widthmin['+counter+']">Yes</td><td><input type="checkbox" name="widthmax['+counter+']">Yes</td><td><input type="checkbox" name="go['+counter+']">Yes</td><td><input type="checkbox" name="nogo['+counter+']">Yes</td><input type="hidden" name="outerinner['+counter+']" value=0><input type="hidden" name="ops" value='+counter+'>';
+}
+function deleteOp(ops) {
+	var rowindex = document.getElementById('Op'+ops+'Outer1').rowIndex
+	document.getElementById('table').deleteRow(rowindex+1);
+	document.getElementById('table').deleteRow(rowindex);
+}
+var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><?xml version="1.0" encoding="UTF-8" standalone="yes"?><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>table,td {border:thin solid black}table{border-collapse:collapse}</style></head><body><table>{table}</table></body></html>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById("export")
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            document.getElementById("dlink").href = uri + base64(format(template, ctx));
+            var filename = "{{filename}}" + '.xls';
+            document.getElementById("dlink").download = filename;
+            document.getElementById("dlink").click();
+
+        }
+    })()
+</script>

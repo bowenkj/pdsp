@@ -1,0 +1,375 @@
+<head>
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.0.3/css/bootstrap.min.css">
+</head>
+<div style="width:8500px;overflow:auto">
+{% if edit: %}
+Enable/Disable Autosave <input type="checkbox" checked onclick="disable(this)">
+<p id="autosave">Auto save in 60s ...</p>
+{% if copy>0: %}
+<form method="post">
+	Copy from
+	<select name="version">
+		{% for each in select: %}
+  		<option value="{{each[0]}}">{{each[1]}} {{each[0]}}</option>
+  		{% endfor %}
+	</select>
+	<input type="submit" name="submit" value="Copy">
+</form>
+{% endif %}
+<form method="post">
+<input type="text" name="filename" value="{{filename}}" style="font-size:1.25em;">
+<p></p>
+<table id="table" border="1">
+<tr>
+	<th rowspan="2">Insert Op.</th>
+	<th rowspan="2">Delete Op.</th>
+	<th rowspan="2">No.</th>
+	<th rowspan="2">Operations</th>
+	<th rowspan="2">Reference Doc.</th>
+	<th rowspan="2">Set Up Time</th>
+	<th rowspan="2">Op. Time</th>
+	<th rowspan="2">Characteristics being processed</th>
+	<th rowspan="2">CTQ</th>
+	<th colspan="4">Inspection (in mm)</th>
+	<th rowspan="2">Equipment</th>
+	<th rowspan="2">Sample Size</th>
+	<th rowspan="2">Doc. Method</th>
+	<th rowspan="2">Remark</th>
+	<th rowspan="2">Insert Line</th>
+	<th rowspan="2">Delete Line</th>
+</tr>
+<tr>
+	<th>Location(Grid)</th>
+	<th>Dim.</th>
+	<th>Lower Tol.</th>
+	<th>upper Tol.</th>
+</tr>
+	{% if infos: %}
+		{% for info in infos: %}
+		<tr id="Op{{info[20]}}Line{{info[6]}}">
+			{% if info[6]==0: %}
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}><input type="button" value="+" onclick="addOp({{info[20]}})"></td>
+			{% if info[20]!=0: %}
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}><input type="button" value="-" onclick="deleteOp({{info[20]}})"></td>
+			{% else: %}
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}></td>
+			{% endif %}
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[2]}}</td>
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}><textarea name="operations[{{info[20]}}]" rows="5" cols="35">{{info[4]}}</textarea></td>
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>
+				<select onchange=selectBOM(this,"refdoc",{{info[20]}})>
+					{% for filename in refdocFiles: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+					{% for filename in refdocFiles2: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+					{% for filename in refdocFiles3: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+				</select>
+				{% for refdoc in info[5].split(","): %}
+					{% if refdoc!="": %}
+					<p>
+						<input type="hidden" name="refdoc[{{info[20]}}]" value="{{refdoc}}">
+						<a href="/static/uploads/{{productid}}/refdoc/{{refdoc}}" target="_blank">{{refdoc}}</a>
+						<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+					</p>
+					{% endif %}
+				{% endfor %}
+			</td>
+			{% endif %}
+			<td><textarea name="setuptime[{{info[20]}}][{{info[6]}}]">{{info[7]}}</textarea></td>
+			<td><textarea name="optime[{{info[20]}}][{{info[6]}}]">{{info[8]}}</textarea></td>
+			<td><textarea name="characteristics[{{info[20]}}][{{info[6]}}]">{{info[9]}}</textarea></td>
+			<td><textarea name="ctq[{{info[20]}}][{{info[6]}}]">{{info[10]}}</textarea></td>
+			<td><textarea name="location[{{info[20]}}][{{info[6]}}]">{{info[11]}}</textarea></td>
+			<td><textarea name="dim[{{info[20]}}][{{info[6]}}]">{{info[12]}}</textarea></td>
+			<td><textarea name="lowertol[{{info[20]}}][{{info[6]}}]">{{info[13]}}</textarea></td>
+			<td><textarea name="uppertol[{{info[20]}}][{{info[6]}}]">{{info[14]}}</textarea></td>
+			<td>
+				<select onchange=selectInput(this,"equipment[{{info[20]}}][{{info[6]}}]")>
+					{% for filename in equipmentFiles: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+				</select>
+				{% for equipment in info[15].split(","): %}
+					{% if equipment!="": %}
+					<p>
+						<input type="hidden" name="equipment[{{info[20]}}][{{info[6]}}]" value="{{equipment}}">
+						{{equipment}}
+						<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+					</p>
+					{% endif %}
+				{% endfor %}
+			</td>
+			{% if info[6]==0: %}
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}><textarea name="samplesize[{{info[20]}}]">{{info[16]}}</textarea></td>
+			<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}><textarea name="docmethod[{{info[20]}}]" rows="5" cols="25">{{info[17]}}</textarea></td>
+			{% endif %}
+			<td><textarea name="remark[{{info[20]}}][{{info[6]}}]">{{info[18]}}</textarea></td>
+			<td><input type="button" value="+" onclick="addLine({{info[20]}},{{info[6]}})"></td>
+			{% if info[6]!=0: %}
+			<td><input type="button" value="-" onclick="deleteLine({{info[20]}},{{info[6]}})"></td>
+			{% else: %}
+			<td></td>
+			<input type="hidden" name="ops" value={{info[20]}}>
+			{% endif %}
+			<input type="hidden" name="lines[{{info[20]}}]" value={{info[6]}}>
+		</tr>
+		{% endfor %}
+	{% else: %}
+		<tr id="Op0Line0">
+			<td name="rowspan[0]"><input type="button" value="+" onclick="addOp(0)"></td>
+			<td name="rowspan[0]"></td>
+			<td name="rowspan[0]"></td>
+			<td name="rowspan[0]"><textarea name="operations[0]" rows="5" cols="35"></textarea></td>
+			<td name="rowspan[0]">
+				<select onchange=selectBOM(this,"refdoc",0)>
+					{% for filename in refdocFiles: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+					{% for filename in refdocFiles2: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+					{% for filename in refdocFiles3: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+				</select></td>
+			<td><textarea name="setuptime[0][0]"></textarea></td>
+			<td><textarea name="optime[0][0]"></textarea></td>
+			<td><textarea name="characteristics[0][0]"></textarea></td>
+			<td><textarea name="ctq[0][0]"></textarea></td>
+			<td><textarea name="location[0][0]"></textarea></td>
+			<td><textarea name="dim[0][0]"></textarea></td>
+			<td><textarea name="lowertol[0][0]"></textarea></td>
+			<td><textarea name="uppertol[0][0]"></textarea></td>
+			<td>
+				<select onchange=selectInput(this,"equipment[0][0]")>
+					{% for filename in equipmentFiles: %}
+					<option value="{{filename}}">{{filename}}</option>
+					{% endfor %}
+				</select>
+			</td>
+			<td name="rowspan[0]"><textarea name="samplesize[0]"></textarea></td>
+			<td name="rowspan[0]"><textarea name="docmethod[0]" rows="5" cols="25"></textarea></td>
+			<td><textarea name="remark[0][0]"></textarea></td>
+			<td><input type="button" value="+" onclick="addLine(0,0)"></td>
+			<td></td>
+			<input type="hidden" name="ops" value=0>
+			<input type="hidden" name="lines[0]" value=0>
+		</tr>
+	{% endif %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'MQCP')" value="Export to Excel">
+<input id="save" type="submit" name="submit" value="Save">
+<input type="submit" name="submit" value="Save and Close">
+</form>
+{% else: %}
+<h2>{{filename}}</h2>
+<p></p>
+<table id="table" border="1">
+<tr>
+	<th rowspan="2">No.</th>
+	<th rowspan="2">Operations</th>
+	<th rowspan="2">Reference Doc.</th>
+	<th rowspan="2">Set Up Time</th>
+	<th rowspan="2">Op. Time</th>
+	<th rowspan="2">Characteristics being processed</th>
+	<th rowspan="2">CTQ</th>
+	<th colspan="4">Inspection (in mm)</th>
+	<th rowspan="2">Equipment</th>
+	<th rowspan="2">Sample Size</th>
+	<th rowspan="2">Doc. Method</th>
+	<th rowspan="2">Remark</th>
+</tr>
+<tr>
+	<th>Location(Grid)</th>
+	<th>Dim.</th>
+	<th>Lower Tol.</th>
+	<th>upper Tol.</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[20]}}Line{{info[6]}}">
+		{% if info[6]==0: %}
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[2]}}</td>
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[4]}}</td>
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>
+			{% for refdoc in info[5].split(","): %}
+			{{refdoc}}<br />
+			{% endfor %}
+		</td>
+		{% endif %}
+		<td>{{info[7]}}</td>
+		<td>{{info[8]}}</td>
+		<td>{{info[9]}}</td>
+		<td>{{info[10]}}</td>
+		<td>{{info[11]}}</td>
+		<td>{{info[12]}}</td>
+		<td>{{info[13]}}</td>
+		<td>{{info[14]}}</td>
+		<td>
+			{% for equipment in info[15].split(","): %}
+			{{equipment}}<br />
+			{% endfor %}
+		</td>
+		{% if info[6]==0: %}
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[16]}}</td>
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[17]}}</td>
+		{% endif %}
+		<td>{{info[18]}}</td>
+	</tr>
+	{% endfor %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'MQCP')" value="Export to Excel">
+{% endif %}
+</div>
+
+<table hidden id="export" border="1">
+<tr>
+	<th rowspan="2">No.</th>
+	<th rowspan="2">Operations</th>
+	<th rowspan="2">Reference Doc.</th>
+	<th rowspan="2">Set Up Time</th>
+	<th rowspan="2">Op. Time</th>
+	<th rowspan="2">Characteristics being processed</th>
+	<th rowspan="2">CTQ</th>
+	<th colspan="4">Inspection (in mm)</th>
+	<th rowspan="2">Equipment</th>
+	<th rowspan="2">Sample Size</th>
+	<th rowspan="2">Doc. Method</th>
+	<th rowspan="2">Remark</th>
+</tr>
+<tr>
+	<th>Location(Grid)</th>
+	<th>Dim.</th>
+	<th>Lower Tol.</th>
+	<th>upper Tol.</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[20]}}Line{{info[6]}}">
+		{% if info[6]==0: %}
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[2]}}</td>
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[4]}}</td>
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>
+			{% for refdoc in info[5].split(","): %}
+			{{refdoc}}<br />
+			{% endfor %}
+		</td>
+		{% endif %}
+		<td>{{info[7]}}</td>
+		<td>{{info[8]}}</td>
+		<td>{{info[9]}}</td>
+		<td>{{info[10]}}</td>
+		<td>{{info[11]}}</td>
+		<td>{{info[12]}}</td>
+		<td>{{info[13]}}</td>
+		<td>{{info[14]}}</td>
+		<td>
+			{% for equipment in info[15].split(","): %}
+			{{equipment}}<br />
+			{% endfor %}
+		</td>
+		{% if info[6]==0: %}
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[16]}}</td>
+		<td name="rowspan[{{info[20]}}]" rowspan={{info[3]}}>{{info[17]}}</td>
+		{% endif %}
+		<td>{{info[18]}}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+<script>
+var counter = {{len}};
+var lines = {{lines|tojson}};
+var linescounter = {{lines|tojson}};
+var time = 60;
+var autosave = 1;
+window.onload=function() {
+	if ({{close}}) window.close();
+	{% if edit: %} setInterval(tip, 1000); {% endif %}
+}
+function disable(element){
+	if (element.checked) {
+		autosave = 1;
+		time = 60;
+	}
+	else autosave = 0;
+}
+function tip(){
+	if (autosave){
+	time -= 1;
+	document.getElementById("autosave").innerHTML='Auto save in '+time+'s ...';
+	if (time==0) document.getElementById("save").click();
+	}
+	else document.getElementById("autosave").innerHTML='';
+}
+function addOp(ops) {
+	counter+=1;
+	lines.push(0);
+	linescounter.push(0);
+	var id='Op'+ops+'Line0';
+	var orow=document.getElementById(id);
+	var nrow=document.getElementById('table').insertRow(orow.rowIndex+linescounter[ops]+1);
+	nrow.id='Op'+counter+'Line0';
+	nrow.innerHTML='<td name="rowspan['+counter+']"><input type="button" value="+" onclick="addOp('+counter+')"></td><td name="rowspan['+counter+']"><input type="button" value="-" onclick="deleteOp('+counter+')"></td><td name="rowspan['+counter+']"></td><td name="rowspan['+counter+']"><textarea name="operations['+counter+']" rows="5" cols="35"></textarea></td><td name="rowspan['+counter+']"><select onchange=selectBOM(this,"refdoc",'+counter+')>{% for filename in refdocFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><textarea name="setuptime['+counter+'][0]"></textarea></td><td><textarea name="optime['+counter+'][0]"></textarea></td><td><textarea name="characteristics['+counter+'][0]"></textarea></td><td><textarea name="ctq['+counter+'][0]"></textarea></td><td><textarea name="location['+counter+'][0]"></textarea></td><td><textarea name="dim['+counter+'][0]"></textarea></td><td><textarea name="lowertol['+counter+'][0]"></textarea></td><td><textarea name="uppertol['+counter+'][0]"></textarea></td><td><select onchange=selectInput(this,"equipment['+counter+'][0]")>{% for filename in equipmentFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td name="rowspan['+counter+']"><textarea name="samplesize['+counter+']"></textarea></td><td name="rowspan['+counter+']"><textarea name="docmethod['+counter+']" rows="5" cols="25"></textarea></td><td><textarea name="remark['+counter+'][0]"></textarea></td><td><input type="button" value="+" onclick="addLine('+counter+',0)"></td><td></td><input type="hidden" name="ops" value='+counter+'><input type="hidden" name="lines['+counter+']" value=0>';
+}
+function deleteOp(ops) {
+	var rowindex = document.getElementById('Op'+ops+'Line0').rowIndex
+	var i;
+	for (i=rowindex+linescounter[ops]; i>=rowindex; i--) document.getElementById('table').deleteRow(i);
+}
+function addLine(ops, line) {
+	var spans=document.getElementsByName('rowspan['+ops+']');
+	var span;
+	for (span=0; span<spans.length; span++) spans[span].rowSpan+=1;
+	var id='Op'+ops+'Line'+line;
+	lines[ops]+=1;
+	linescounter[ops]+=1;
+	var orow=document.getElementById(id);
+	var nrow=document.getElementById('table').insertRow(orow.rowIndex+1);
+	nrow.id='Op'+ops+'Line'+lines[ops];
+	nrow.innerHTML='<td><textarea name="setuptime['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="optime['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="characteristics['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="ctq['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="location['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="dim['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="lowertol['+ops+']['+lines[ops]+']"></textarea></td><td><textarea name="uppertol['+ops+']['+lines[ops]+']"></textarea></td><td><select onchange=selectInput(this,"equipment['+ops+']['+lines[ops]+']")>{% for filename in equipmentFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><textarea name="remark['+ops+']['+lines[ops]+']"></textarea></td><td><input type="button" value="+" onclick="addLine('+ops+','+lines[ops]+')"></td><td><input type="button" value="-" onclick="deleteLine('+ops+','+lines[ops]+')"></td><input type="hidden" name="lines['+ops+']" value='+lines[ops]+'>';
+}
+function deleteLine(ops, line) {
+	linescounter[ops]-=1;
+	var row = document.getElementById('Op'+ops+'Line'+line)
+	var spans=document.getElementsByName('rowspan['+ops+']');
+	var span;
+	for (span=0; span<spans.length; span++) spans[span].rowSpan-=1;
+	document.getElementById('table').deleteRow(row.rowIndex);
+}
+function selectBOM(element, type, op){
+	var oldHTML=element.parentNode.innerHTML
+	{% if close==0: %}
+	element.parentNode.innerHTML=oldHTML+'<p><input type="hidden" name="'+type+'['+op+']" value="'+element.value+'"><a href="/static/uploads/'+{{productid}}+'/'+type+'/'+element.value+'" target="_blank">'+element.value+'</a><span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span></p><br />';
+	{% endif %}
+}
+function selectInput(element, type){
+	var oldHTML=element.parentNode.innerHTML
+	element.parentNode.innerHTML=oldHTML+'<p><input type="hidden" name="'+type+'" value="'+element.value+'">'+element.value+'<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span></p><br />';
+}
+var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><?xml version="1.0" encoding="UTF-8" standalone="yes"?><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>table,td {border:thin solid black}table{border-collapse:collapse}</style></head><body><table>{table}</table></body></html>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById("export")
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            document.getElementById("dlink").href = uri + base64(format(template, ctx));
+            var filename = "{{filename}}" + '.xls';
+            document.getElementById("dlink").download = filename;
+            document.getElementById("dlink").click();
+
+        }
+    })()
+function removeFile(element){
+	var child = element.parentNode
+	var parent = element.parentNode.parentNode
+	parent.removeChild(child)
+
+}
+</script>

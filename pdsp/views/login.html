@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login" {% if type == "edit": %} style="width: 50%;" {% endif %}>
+    {% if type=="login": %}
+    <h3 >Log in to your account</h3>
+    <form action="/user/login" method="post"  style = "margin-left:-130px">
+    	<div class="form-group">
+			<label  class="col-sm-3 control-label" style = "margin-top:0.1em">Username:</label>
+			<div class="col-sm-9">
+        		<input type="text" name="username" placeholder="username" style="width:112%">
+        	</div>
+   		</div>
+    	<div class="form-group">
+			<label  class="col-sm-3 control-label" style = "margin-top:1em">Password:</label>
+			<div class="col-sm-9">
+        		<input type="password" name="password" placeholder="password" style="width:112%;height:20;margin-top:0.5em">
+        	</div>
+    	</div>
+        <input type="hidden" name="next" value="{{next}}">
+        
+        <a href="#" onclick="toggle_visibility();" style="margin-left: 35px;font-size:8pt"> Forgot your password?</a>
+        <input type="submit" value="LOG IN" style="width:77%;background-color:rgb(0,153,153);color:#FFFFFF; margin-left: 112px">
+    </form>
+    <form action="/user/forgot" method="post" id="forgot" style="display:none">
+        <p style="font-size:12pt">Enter your username and we will send a password reset link to the your email address.</p>
+        <input type="text" name="username" placeholder="Username" style="width:100%">
+        <input type="submit" value="Send" style="width:100%;background-color:rgb(0,153,153);color:#FFFFFF;margin-top:1.5em">
+    </form>
+    {% elif type=="signup": %}
+    <h3 style="margin-left: -15px">Sign up an account:</h3>
+    <form action="/user" onsubmit="return validateForm()" method="post" class="form-horizontal" style = "margin-left: -90px; margin-right: 5px">
+    	<div class="form-group">
+			<label  class="col-sm-3 control-label">Username:</label>
+			<div class="col-sm-9">
+        		<input required type="text" name="username" placeholder="username (A-Z, a-z, 0-9, _)" pattern="\w+" minlength="3" maxlength="20" style="width:100%">
+        	</div>
+		</div>
+        <div class="form-group">
+			<label  class="col-sm-3 control-label">Company:</label>
+			<div class="col-sm-9">
+        		<input required type="text" name="company" placeholder="company name" maxlength="20" style="width:100%">
+        	</div>
+        </div>
+        <div class="form-group">
+			<label  class="col-sm-3 control-label" >Phone:</label>
+			<div class="col-sm-9">
+        		<input required type="text" name="phone" placeholder="mobile phone" pattern="[0-9]*" minlength="11" maxlength="11" style="width:100%">
+        	</div>
+        </div>
+        <div class="form-group">
+			<label  class="col-sm-3 control-label" >Email:</label>
+			<div class="col-sm-9">
+        		<input required type="email" name="email" placeholder="example@example.com" maxlength="255" style="width:100%">
+        	</div>
+        </div>
+        <div class="form-group">
+			<label  class="col-sm-3 control-label" style="margin-top:1.8em">Password:</label>
+			<div class="col-sm-9">
+        		<input required type="password" name="password" placeholder="at least one letter and digit" pattern="([0-9]+[a-zA-Z]|[a-zA-Z]+[0-9])[a-z0-9]*" minlength="5" maxlength="15" style="width:100%;margin-top:1.5em">
+        	</div>
+        </div>
+        <div class="form-group">
+			<label  class="col-sm-3 control-label" >Confirm:</label>
+			<div class="col-sm-9">
+        		<input required type="password" name="password2" placeholder="confirm password" style="width:100%">
+        	</div>
+        </div>
+        <div class="form-group">
+			<div class="col-sm-9">
+        <input type="submit" value="SIGN UP" style="width:100%;background-color:rgb(0,153,153);color:#FFFFFF;margin-top:2.5em; margin-left: 97px;">
+        	</div>
+        </div>
+    </form>
+    {% elif type=="edit": %}
+    <h3 style="margin-left: -15px">Edit your account:</h3>
+	<form  action="/user/edit" method="post" class="form-horizontal" style = "margin-left: 20px">
+		<div class="form-group">
+			<label  class="col-sm-3 control-label">Company:</label>
+			<div class="col-sm-9">
+        		<input required type="text" name="company" value="{{user[1]}}" placeholder="company name" maxlength="20" style="margin-left:-155px; width:64%">
+			</div>
+		</div>
+		<div class="form-group">
+			<label  class="col-sm-3 control-label">Phone:</label>
+			<div class="col-sm-9">
+        		<input required type="text" name="phone" value="{{user[0]}}" placeholder="mobile phone" pattern="[0-9]*" minlength="11" maxlength="11" style="margin-left:-155px; width:64%">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">Email:</label>
+			<div class="col-sm-9">
+   		    	<input required type="email" name="email" value="{{user[2]}}" placeholder="example@example.com" maxlength="255" style="margin-left:-155px; width:64%">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-3 col-sm-9">
+    		    <input type="submit" name="submit" value="Save" style="margin-left:-155px; width:64%;background-color:rgb(0,153,153);color:#FFFFFF;margin-top:1.5em">
+			</div>
+		</div>
+    </form>
+    <form action="/user/edit" onsubmit="return validateForm()" method="post" class="form-horizontal" style = "margin-left: 20px">
+		<div class="form-group">
+			<label class="col-sm-3 control-label">Old Password:</label>
+			<div class="col-sm-9">
+        		<input required type="password" name="passwordOld" placeholder="old password" style="margin-left:-155px; width:64%">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">New Password:</label>
+			<div class="col-sm-9">
+        		<input required type="password" name="password" placeholder="new password" pattern="([0-9]+[a-zA-Z]|[a-zA-Z]+[0-9])[a-z0-9]*" minlength="5" maxlength="15" style="margin-left:-155px; width:64%">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">Confirm:</label>
+			<div class="col-sm-9">
+        		<input required type="password" name="password2" placeholder="confirm new password" style="margin-left:-155px; width:64%">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-3 col-sm-9">
+        		<input type="submit" name="submit" value="Change Password" style="margin-left:-155px; width:64%;background-color:rgb(0,153,153);color:#FFFFFF;margin-top:1.5em">
+			</div>
+		</div>
+    </form>
+    <form action="/user/edit" method="post" class="form-horizontal">
+		<div class="form-group">
+			<div class="col-sm-offset-3 col-sm-9">
+				<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" style="margin-left:-138px; width:62%; background-color:red; font: Helvetica; font-weight: bold; font-size: 0.85em"  data-target="#deleteConfirm">DELETE ACCOUNT</button>
+			</div>
+		</div>
+		<div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
+		  <div class="modal-dialog" role="document" style="margin-top: 5em;">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">×</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">Do you want to delete?</h4>
+			  </div>
+			  <div class="modal-body">
+				Your account cannot be retrieved once deleted... 
+			  </div>
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" >Cancel</button>
+				<!--button type="button" class="btn btn-primary">Save changes</button-->
+				<button type="submit" value="Delete" class="btn btn-secondary" name="submit" style="  background-color:red;   "> Delete </button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+    </form>
+    {% elif type=="reset": %}
+    <h3 style="text-align:left">Reset your password:</h3>
+    <form onsubmit="return validateForm()" method="post">
+        <input required type="password" name="password" placeholder="New Password" pattern="([0-9]+[a-zA-Z]|[a-zA-Z]+[0-9])[a-z0-9]*" minlength="5" maxlength="15" style="width:100%;margin-top:0.5em">
+        <input required type="password" name="password2" placeholder="Confirm new password" style="width:100%;margin-top:0.5em">
+        <input type="submit" name="submit" value="Change Password" style="width:100%;margin-top:1.5em">
+    </form>
+    {% endif %}
+</div>
+<script>
+function validateForm() {
+    var p1 = document.getElementsByName("password")[0].value;
+    var p2 = document.getElementsByName("password2")[0].value;
+    if (p1 != p2) {
+        alert("Password not same!");
+        return false;
+    }
+    return true;
+}
+function toggle_visibility() {
+    var e = document.getElementById("forgot");
+    if(e.style.display == 'block')
+    e.style.display = 'none';
+    else
+    e.style.display = 'block';
+}
+</script>
+{% endblock %}

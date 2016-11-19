@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<center>
+    <br/><br/>
+    <h1>Siemens Production Document System</h1>
+    {% if current_user.is_authenticated==False: %}
+    <div style="width:30%">
+        <form action="/user/login" method="post"  style = "margin-left:-130px">
+            <div class="form-group">
+                <label  class="col-sm-3 control-label" style = "margin-top:0.1em">Username:</label>
+                <div class="col-sm-9">
+                    <input type="text" name="username" placeholder="Username" style="width:103% ">
+                </div>
+            </div>
+            <div class="form-group">
+                <label  class="col-sm-3 control-label" style = "margin-top:1em">Password:</label>
+                <div class="col-sm-9">
+                    <input type="password" name="password" placeholder="Password" style="width:103%;height:20;margin-top:0.7em">
+                </div>
+            </div>
+            <input type="hidden" name="next" value="{{next}}">
+            <a href="#" onclick="toggle_visibility();" style="font-size:8pt ;margin-left:10px"> Forgot your password?</a>
+            <input type="submit" value="LOG IN" style="width:73%;background-color:rgb(0,153,153);color:#FFFFFF; margin-left:129px">
+        </form>
+        <form action="/user/forgot" method="post" id="forgot" style="display:none">
+            <p style="font-size:12pt">Enter your username and we will send a password reset link to the your email address.</p>
+            <input type="text" name="username" placeholder="username" style="width:100%">
+            <input type="submit" value="Send" style="width:100%;background-color:rgb(0,153,153);color:#FFFFFF;margin-top:1.5em">
+        </form>
+        <p style="margin-top:-1em; margin-bottom:1em">OR</p>
+        <a href="/user" class="button" style="width:100%">SIGN UP</a>
+
+    </div>
+    {% else: %}
+
+    <form action="/create" method="post">
+        <input required type="text" name="name" placeholder="Enter the Product Name you want to create" style="width:40%;border-color:rgb(0,153,153);margin-top:1em">
+        <input type="submit" value="CREATE" style="background-color:rgb(0,153,153);color:#FFFFFF">
+    </form>
+    {% endif %}
+</center>
+
+{% if current_user.is_authenticated == True: %}
+    {% if allproducts: %}
+    <h2>All Products</h2>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Created Time</th>
+            <th>Creator</th>
+          </tr>
+        {% for product in allproducts %}
+          <tr>
+              <td><a href="/product?id={{product[0]}}&next={{next}}">{{product[1]}}</a></td>
+              <td>{{product[2]}}</td>
+              <td>{{product[3]}}</td>
+          </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <br></br>
+        <h2 style= "text-align:center; color:rgb(0,153,153)">Welcome! Please create your first product!</h2>
+        <br></br>
+    {% endif %}
+{% endif %}
+
+
+<script>
+function validateForm() {
+    var p1 = document.getElementsByName("password")[0].value;
+    var p2 = document.getElementsByName("password2")[0].value;
+    if (p1 != p2) {
+        alert("Password not same!");
+        return false;
+    }
+    return true;
+}
+function toggle_visibility() {
+    var e = document.getElementById("forgot");
+    if(e.style.display == 'block')
+    e.style.display = 'none';
+    else
+    e.style.display = 'block';
+}
+</script>
+{% endblock %}

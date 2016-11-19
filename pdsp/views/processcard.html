@@ -1,0 +1,416 @@
+<head>
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.0.3/css/bootstrap.min.css">
+</head>
+<div style="width:5500px;overflow:auto">
+{% if edit: %}
+Enable/Disable Autosave <input type="checkbox" checked onclick="disable(this)">
+<p id="autosave">Auto save in 60s ...</p>
+	{% if copy>0: %}
+	<form method="post">
+		Copy from
+		<select name="version">
+			{% for each in select: %}
+	  		<option value="{{each[0]}}">{{each[1]}} {{each[0]}}</option>
+	  		{% endfor %}
+		</select>
+		<input type="submit" name="submit" value="Copy">
+	</form>
+	{% endif %}
+	<form method="post">
+	<input type="text" name="filename" value="{{filename}}" style="font-size:1.25em;">
+	<p></p>
+	<table id="table" border="1">
+	<tr>
+		<th>Insert Op.</th>
+		<th>Delete Op.</th>
+		<th>Dept.</th>
+		<th>Step</th>
+		<th>Process Operation</th>
+		<th>Drawing No.&Spec.&TA</th>
+		<th>VGB MKB</th>
+		<th>Equipment Accessary</th>
+		<th>Fixture&Gage&Program</th>
+		<th>Cut tool&Assembly tool&Process material</th>
+		<th>Work Instruction&Record Sheet&Run No.</th>
+		<th>Result</th>
+		<th>Operator</th>
+		<th>Comment</th>
+	</tr>
+		{% if infos: %}
+			{% for info in infos: %}
+			<tr id="Op{{info[16]}}">
+				<td><input type="button" value="+" onclick="addOp({{info[16]}})"></td>
+				{% if info[16]!=0: %}
+				<td><input type="button" value="-" onclick="deleteOp({{info[16]}})"></td>
+				{% else: %}
+				<td></td>
+				{% endif %}
+				<td><textarea name="dept[{{info[16]}}]" rows="5" cols="5">{{info[2]}}</textarea></td>
+				<td>{{info[3]}}</td>
+				<td><textarea name="operation[{{info[16]}}]" rows="5" cols="35">{{info[4]}}</textarea></td>
+				<td>
+					<select onchange=selectBOM(this,"spec",{{info[16]}})>
+						{% for filename in specFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+					{% for spec in info[5].split(","): %}
+						{% if spec!="": %}
+						<p>
+							<input type="hidden" name="spec[{{info[16]}}]" value="{{spec}}">
+							<a href="/static/uploads/{{productid}}/spec/{{spec}}" target="_blank">{{spec}}</a>
+							<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+						</p>
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td>
+					<select onchange=selectBOM(this,"vgbmkb",{{info[16]}})>
+						{% for filename in vgbmkbFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+					{% for vgbmkb in info[6].split(","): %}
+						{% if vgbmkb!="": %}
+						<p>
+							<input type="hidden" name="vgbmkb[{{info[16]}}]" value="{{vgbmkb}}">
+							<a href="/static/uploads/{{productid}}/vgbmkb/{{vgbmkb}}" target="_blank">{{vgbmkb}}</a>
+							<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+						</p>
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td>
+					<select onchange=selectInput(this,"equipment",{{info[16]}})>
+						{% for filename in equipmentFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+					{% for equipment in info[7].split(","): %}
+						{% if equipment!="": %}
+						<p>
+							<input type="hidden" name="equipment[{{info[16]}}]" value="{{equipment}}">
+							{{equipment}}
+							<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+						</p>
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td>
+					<select onchange=selectBOM(this,"program",{{info[16]}})>
+						{% for filename in programFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+					{% for program in info[8].split(","): %}
+						{% if program!="": %}
+						<p>
+							<input type="hidden" name="program[{{info[16]}}]" value="{{program}}">
+							<a href="/static/uploads/{{productid}}/program/{{program}}" target="_blank">{{program}}</a>
+							<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+						</p>
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td>
+					<select onchange=selectInput(this,"material",{{info[16]}})>
+						{% for filename in toolingFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+					{% for material in info[9].split(","): %}
+						{% if material!="": %}
+						<p>
+							<input type="hidden" name="material[{{info[16]}}]" value="{{material}}">
+							{{material}}
+							<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+						</p>
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td>
+					<select onchange=selectBOM(this,"wi",{{info[16]}})>
+						{% for filename in wiFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+					{% for wi in info[10].split(","): %}
+						{% if wi!="": %}
+						<p>
+							<input type="hidden" name="wi[{{info[16]}}]" value="{{wi}}">
+							<a href="/static/uploads/{{productid}}/wi/{{wi}}" target="_blank">{{wi}}</a>
+							<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span><br />
+						</p>
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td><input type="checkbox" name="result[{{info[16]}}]" {% if info[11]: %}checked{% endif %}>ok</td>
+				<td><textarea name="operator[{{info[16]}}]" rows="5" cols="5">{{info[12]}}</textarea></td>
+				<td><textarea name="comment[{{info[16]}}]" rows="5" cols="35">{{info[13]}}</textarea></td>
+				<input type="hidden" name="ops" value={{info[16]}}>
+			</tr>
+			<tr>
+				<td></td><td></td><td colspan="12"><textarea name="other[{{info[16]}}]" style="width:100%">{{info[14]}}</textarea></td>
+			</tr>
+			{% endfor %}
+		{% else: %}
+			<tr id="Op0">
+				<td><input type="button" value="+" onclick="addOp(0)"></td>
+				<td></td>
+				<td><textarea name="dept[0]" rows="5" cols="5"></textarea></td>
+				<td></td>
+				<td><textarea name="operation[0]" rows="5" cols="35"></textarea></td>
+				<td>
+					<select onchange=selectBOM(this,"spec",0)>
+						{% for filename in specFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td>
+					<select onchange=selectBOM(this,"vgbmkb",0)>
+						{% for filename in vgbmkbFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td>
+					<select onchange=selectInput(this,"equipment",0)>
+						{% for filename in equipmentFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td>
+					<select onchange=selectBOM(this,"program",0)>
+						{% for filename in programFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td>
+					<select onchange=selectInput(this,"material",0)>
+						{% for filename in toolingFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td>
+					<select onchange=selectBOM(this,"wi",0)>
+						{% for filename in wiFiles: %}
+						<option value="{{filename}}">{{filename}}</option>
+						{% endfor %}
+					</select>
+				</td>
+				<td><input type="checkbox" name="result[0]" value="">ok</td>
+				<td><textarea name="operator[0]" rows="5" cols="5"></textarea></td>
+				<td><textarea name="comment[0]" rows="5" cols="35"></textarea></td>
+				<input type="hidden" name="ops" value=0>
+			</tr>
+			<tr>
+				<td></td><td></td><td colspan="12"><textarea name="other[0]" style="width:100%"></textarea></td>
+			</tr>
+		{% endif %}
+	</table>
+	<a id="dlink"  style="display:none;"></a>
+	<input type="button" onclick="tableToExcel('tablename', 'processcard')" value="Export to Excel">
+	<input id="save" type="submit" name="submit" value="Save">
+	<input type="submit" name="submit" value="Save and Close">
+	</form>
+	{% else: %}
+	<h2>{{filename}}</h2>
+	<p></p>
+	<table id="table" border="1">
+	<tr>
+		<th>Dept.</th>
+		<th>Step</th>
+		<th>Process Operation</th>
+		<th>Drawing No.&Spec.&TA</th>
+		<th>VGB MKB</th>
+		<th>Equipment Accessary</th>
+		<th>Fixture&Gage&Program</th>
+		<th>Cut tool&Assembly tool&Process material</th>
+		<th>Work Instruction&Record Sheet&Run No.</th>
+		<th>Result</th>
+		<th>Operator</th>
+		<th>Comment</th>
+	</tr>
+			{% for info in infos: %}
+		<tr id="Op{{info[16]}}">
+			<td>{{info[2]}}</td>
+			<td>{{info[3]}}</td>
+			<td>{{info[4]}}</td>
+			<td>
+				{% for spec in info[5].split(","): %}
+				{{spec}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for vgbmkb in info[6].split(","): %}
+				{{vgbmkb}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for equipment in info[7].split(","): %}
+				{{equipment}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for program in info[8].split(","): %}
+				{{program}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for material in info[9].split(","): %}
+				{{material}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for wi in info[10].split(","): %}
+				{{wi}}<br />
+				{% endfor %}
+			</td>
+			<td><input disabled type="checkbox" name="result[{{info[16]}}]" {% if info[11]: %}checked{% endif %}>ok</td>
+			<td>{{info[12]}}</td>
+			<td>{{info[13]}}</td>
+		</tr>
+		<tr>
+			<td colspan="12">{{info[14]}}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	<a id="dlink"  style="display:none;"></a>
+	<input type="button" onclick="tableToExcel('tablename', 'processcard')" value="Export to Excel">
+{% endif %}
+</div>
+
+<table hidden id="export" border="1">
+<tr>
+	<th>Dept.</th>
+	<th>Step</th>
+	<th>Process Operation</th>
+	<th>Drawing No.&Spec.&TA</th>
+	<th>VGB MKB</th>
+	<th>Equipment Accessary</th>
+	<th>Fixture&Gage&Program</th>
+	<th>Cut tool&Assembly tool&Process material</th>
+	<th>Work Instruction&Record Sheet&Run No.</th>
+	<th>Result</th>
+	<th>Operator</th>
+	<th>Comment</th>
+</tr>
+		{% for info in infos: %}
+		<tr id="Op{{info[16]}}">
+			<td>{{info[2]}}</td>
+			<td>{{info[3]}}</td>
+			<td>{{info[4]}}</td>
+			<td>
+				{% for spec in info[5].split(","): %}
+				{{spec}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for vgbmkb in info[6].split(","): %}
+				{{vgbmkb}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for equipment in info[7].split(","): %}
+				{{equipment}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for program in info[8].split(","): %}
+				{{program}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for material in info[9].split(","): %}
+				{{material}}<br />
+				{% endfor %}
+			</td>
+			<td>
+				{% for wi in info[10].split(","): %}
+				{{wi}}<br />
+				{% endfor %}
+			</td>
+			<td><input disabled type="checkbox" name="result[{{info[16]}}]" {% if info[11]: %}checked{% endif %}>ok</td>
+			<td>{{info[12]}}</td>
+			<td>{{info[13]}}</td>
+		</tr>
+		<tr>
+			<td colspan="12">{{info[14]}}</td>
+		</tr>
+		{% endfor %}
+</table>
+
+<script>
+var counter = {{len}};
+var time = 60;
+var autosave = 1;
+window.onload=function() {
+	if ({{close}}) window.close();
+	{% if edit: %} setInterval(tip, 1000); {% endif %}
+}
+function disable(element){
+	if (element.checked) {
+		autosave = 1;
+		time = 60;
+	}
+	else autosave = 0;
+}
+function tip(){
+	if (autosave){
+	time -= 1;
+	document.getElementById("autosave").innerHTML='Auto save in '+time+'s ...';
+	if (time==0) document.getElementById("save").click();
+	}
+	else document.getElementById("autosave").innerHTML='';
+}
+function addOp(ops) {
+	counter+=1;
+	var id='Op'+ops;
+	var orow=document.getElementById(id);
+	var nrow=document.getElementById('table').insertRow(orow.rowIndex+2);
+	nrow.id='Op'+counter;
+	nrow.innerHTML='<td><input type="button" value="+" onclick="addOp('+counter+')"></td><td><input type="button" value="-" onclick="deleteOp('+counter+')"></td><td><textarea name="dept['+counter+']" rows="5" cols="5"></textarea></td><td></td><td><textarea name="operation['+counter+']" rows="5" cols="35"></textarea></td><td><select onchange=selectBOM(this,"spec",'+counter+')>{% for filename in specFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><select onchange=selectBOM(this,"vgbmkb",'+counter+')>{% for filename in vgbmkbFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><select onchange=selectInput(this,"equipment",0)>{% for filename in equipmentFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><select onchange=selectBOM(this,"program",'+counter+')>{% for filename in programFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><select onchange=selectInput(this,"material",0)>{% for filename in toolingFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><select onchange=selectBOM(this,"wi",'+counter+')>{% for filename in wiFiles: %}<option value="{{filename}}">{{filename}}</option>{% endfor %}</select></td><td><input type="checkbox" name="result['+counter+']" value="">ok</td><td><textarea name="operator['+counter+']" rows="5" cols="5"></textarea></td><td><textarea name="comment['+counter+']" rows="5" cols="35"></textarea></td><input type="hidden" name="ops" value='+counter+'>';
+	var nrow2=document.getElementById('table').insertRow(orow.rowIndex+3);
+	nrow2.innerHTML='<td></td><td></td><td colspan="12"><textarea name="other['+counter+']" style="width:100%"></textarea></td>';
+}
+function deleteOp(ops) {
+	var rowindex = document.getElementById('Op'+ops).rowIndex;
+	document.getElementById('table').deleteRow(rowindex+1);
+	document.getElementById('table').deleteRow(rowindex);
+}
+function selectBOM(element, type, op){
+	var oldHTML=element.parentNode.innerHTML;
+	{% if close==0: %}
+	element.parentNode.innerHTML=oldHTML+'<p><input type="hidden" name="'+type+'['+op+']" value="'+element.value+'"><a href="/static/uploads/'+{{productid}}+'/'+type+'/'+element.value+'" target="_blank">'+element.value+'</a><span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span></p>';
+	{% endif %}
+}
+function selectInput(element, type, op){
+	var oldHTML=element.parentNode.innerHTML;
+	element.parentNode.innerHTML=oldHTML+'<p><input type="hidden" name="'+type+'['+op+']" value="'+element.value+'">'+element.value+'<span id="1" class="glyphicon glyphicon-remove" onclick="removeFile(this)"></span></p><br />';
+}
+var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><?xml version="1.0" encoding="UTF-8" standalone="yes"?><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>table,td {border:thin solid black}table{border-collapse:collapse}</style></head><body><table>{table}</table></body></html>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById("export")
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            document.getElementById("dlink").href = uri + base64(format(template, ctx));
+            var filename = "{{filename}}" + '.xls';
+            document.getElementById("dlink").download = filename;
+            document.getElementById("dlink").click();
+
+        }
+    })()
+function removeFile(element){
+	var child = element.parentNode
+	var parent = element.parentNode.parentNode
+	parent.removeChild(child)
+
+}
+</script>

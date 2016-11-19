@@ -1,0 +1,116 @@
+<div style="width:1200px;overflow:auto">
+<h2>Equipment List</h2>
+<p></p>
+Enable/Disable Autosave <input type="checkbox" checked onclick="disable(this)">
+<p id="autosave">Auto save in 60s ...</p>
+<form method="post">
+<table id="table" border="1">
+<tr>
+	<th>Insert</th>
+	<th>Delete</th>
+	<th>ID</th>
+	<th>Name</th>
+	<th>Specification</th>
+</tr>
+	{% if infos: %}
+		{% for info in infos: %}
+		<tr id="Op{{info[5]}}">
+			<td><input type="button" value="+" onclick="addOp({{info[5]}})"></td>
+			{% if info[5]!=0: %}
+			<td><input type="button" value="-" onclick="deleteOp({{info[5]}})"></td>
+			{% else: %}
+			<td></td>
+			{% endif %}
+			<td><textarea name="id[{{info[5]}}]">{{info[2]}}</textarea></td>
+			<td><textarea name="name[{{info[5]}}]">{{info[3]}}</textarea></td>
+			<td><textarea name="spec[{{info[5]}}]">{{info[4]}}</textarea></td>
+			<input type="hidden" name="ops" value={{info[5]}}>
+		</tr>
+		{% endfor %}
+	{% else: %}
+		<tr id="Op0">
+			<td><input type="button" value="+" onclick="addOp(0)"></td>
+			<td></td>
+			<td><textarea name="id[0]"></textarea></td>
+			<td><textarea name="name[0]"></textarea></td>
+			<td><textarea name="spec[0]"></textarea></td>
+			<input type="hidden" name="ops" value=0>
+		</tr>
+	{% endif %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'equipment')" value="Export to Excel">
+<input id="save" type="submit" name="submit" value="Save">
+<input type="submit" name="submit" value="Save and Close">
+</form>
+</div>
+
+<table hidden id="export" border="1">
+<tr>
+	<th>ID</th>
+	<th>Name</th>
+	<th>Specification</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[5]}}">
+		<td>{{info[2]}}</td>
+		<td>{{info[3]}}</td>
+		<td>{{info[4]}}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+<script>
+var counter = {{len}};
+var time = 60;
+var autosave = 1;
+window.onload=function() {
+	if ({{close}}) window.close();
+	setInterval(tip, 1000);
+}
+function disable(element){
+	if (element.checked) {
+		autosave = 1;
+		time = 60;
+	}
+	else autosave = 0;
+}
+function tip(){
+	if (autosave){
+	time -= 1;
+	document.getElementById("autosave").innerHTML='Auto save in '+time+'s ...';
+	if (time==0) document.getElementById("save").click();
+	}
+	else document.getElementById("autosave").innerHTML='';
+}
+function addOp(ops) {
+	//alert(lines);
+	counter+=1;
+	var id='Op'+ops;
+	var orow=document.getElementById(id);
+	//alert(orow.rowIndex);
+	//alert(lines[ops]);
+	var nrow=document.getElementById('table').insertRow(orow.rowIndex+1);
+	nrow.id='Op'+counter;
+	nrow.innerHTML='<td><input type="button" value="+" onclick="addOp('+counter+')"></td><td><input type="button" value="-" onclick="deleteOp('+counter+')"></td><td><textarea name="id['+counter+']"></textarea></td><td><textarea name="name['+counter+']"></textarea></td><td><textarea name="spec['+counter+']"></textarea></td><input type="hidden" name="ops" value='+counter+'>';
+}
+function deleteOp(ops) {
+	var rowindex = document.getElementById('Op'+ops).rowIndex
+	document.getElementById('table').deleteRow(rowindex);
+}
+var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><?xml version="1.0" encoding="UTF-8" standalone="yes"?><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>table,td {border:thin solid black}table{border-collapse:collapse}</style></head><body><table>{table}</table></body></html>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById("export")
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            document.getElementById("dlink").href = uri + base64(format(template, ctx));
+            var filename = 'equipment.xls';
+            document.getElementById("dlink").download = filename;
+            document.getElementById("dlink").click();
+
+        }
+    })()
+</script>
