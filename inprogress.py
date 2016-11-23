@@ -7,6 +7,7 @@ inprogress = Blueprint('inprogress', __name__)
 def inprogress_route():
 
 	cur = mysql.connection.cursor()
+	
 	cur.execute('SELECT * FROM MQCP WHERE released = 0 ')
 	mqcp = cur.fetchall()
 
@@ -35,17 +36,17 @@ def inprogress_route():
 	for i in wi:
 		wi_bust.append(i[0])
 
-	cur.execute('SELECT * FROM weldingprocesscontrolrecord WHERE released = 0 ')
-	wp = cur.fetchall()
+	cur.execute('SELECT * FROM WeldingRecord WHERE released = 0 ')
+	wr = cur.fetchall()
 
-	wp_bust = list()
-	for i in wp:
-		wp_bust.append(i[0])
+	wr_bust = list()
+	for i in wr:
+		wr_bust.append(i[0])
 
 	ids = list(set(mqcp_bust).union(set(pc_bust)))
 	ids = list(set(ids).union(set(rf_bust)))
 	ids = list(set(ids).union(set(wi_bust)))
-	ids = list(set(ids).union(set(wp_bust)))
+	ids = list(set(ids).union(set(wr_bust)))
 	check = [([0] * 8) for i in ids]
 
 
@@ -63,14 +64,14 @@ def inprogress_route():
 			check[ids.index(i)][3] = 1
 		if i in wi_bust:
 			check[ids.index(i)][4] = 1
-		if i in wp_bust:
+		if i in wr_bust:
 			check[ids.index(i)][5] = 1
 
 		check[ids.index(i)][6] = i
 		check[ids.index(i)][7] = pro[3]
 
 
-	return jsonify(	CHECK = [{"pid":i[6], "pname": i[0], "mqcp_bust": i[1], "pc_bust": i[2], "rf_bust": i[3], "wi_bust": i[4], "wp_bust":i[5], "creator": i[7]}  for i in check],
+	return jsonify(	CHECK = [{"pid":i[6], "pname": i[0], "mqcp_bust": i[1], "pc_bust": i[2], "rf_bust": i[3], "wi_bust": i[4], "wr_bust":i[5], "creator": i[7]}  for i in check],
 					USER = current_user.id
     	)
 

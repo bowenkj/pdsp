@@ -135,26 +135,32 @@ def product_edit_route():
 def update_route():
     productid = request.args.get("id")
     cur = mysql.connection.cursor()
+    
     cur.execute('SELECT filename,version FROM MQCP WHERE productid="%s" AND released=0;'%productid)
     mqcp = cur.fetchone()
     if mqcp is not None:
         mqcp = [mqcp[0], unicode(mqcp[1])]
+        
     cur.execute('SELECT filename,version FROM ProcessCard WHERE productid="%s" AND released=0;'%productid)
     processcard = cur.fetchone()
     if processcard is not None:
         processcard = [processcard[0], unicode(processcard[1])]
+        
     cur.execute('SELECT filename,version FROM RecordForm WHERE productid="%s" AND released=0;'%productid)
     recordform = cur.fetchone()
     if recordform is not None:
         recordform = [recordform[0], unicode(recordform[1])]
+        
     cur.execute('SELECT filename,version FROM WorkInstruction WHERE productid="%s" AND released=0;'%productid)
     workinstruction = cur.fetchone()
     if workinstruction is not None:
         workinstruction = [workinstruction[0], unicode(workinstruction[1])]
-    weldingprocesscontrolrecord = cur.fetchone()
-    if weldingprocesscontrolrecord is not None:
-        weldingprocesscontrolrecord = [weldingprocesscontrolrecord[0], unicode(weldingprocesscontrolrecord[1])]
-    return jsonify( INFO = {"mqcp":mqcp, "processcard":processcard, "recordform":recordform, "workinstruction":workinstruction, "weldingprocesscontrolrecord":weldingprocesscontrolrecord})
+    
+    cur.execute('SELECT filename,version FROM WeldingRecord WHERE productid="%s" AND released=0;'%productid)    
+    weldingrecord = cur.fetchone()
+    if weldingrecord is not None:
+        weldingrecord = [weldingrecord[0], unicode(weldingrecord[1])]
+    return jsonify( INFO = {"mqcp":mqcp, "processcard":processcard, "recordform":recordform, "workinstruction":workinstruction, "weldingrecord":weldingrecord})
 @product.route('/product')
 @login_required
 def product_route():
@@ -168,25 +174,36 @@ def product_route():
     if current_user.id!=product[3]:
         flash("You do not have the permission.", "error")
         return redirect('/?search={{next}}')
+    
     cur.execute('SELECT * FROM MQCP WHERE productid="%s" AND released=0;'%productid)
     mqcp = cur.fetchone()
+    
     cur.execute('SELECT * FROM ProcessCard WHERE productid="%s" AND released=0;'%productid)
     processcard = cur.fetchone()
+    
     cur.execute('SELECT * FROM RecordForm WHERE productid="%s" AND released=0;'%productid)
     recordform = cur.fetchone()
+    
     cur.execute('SELECT * FROM WorkInstruction WHERE productid="%s" AND released=0;'%productid)
     workinstruction = cur.fetchone()
-    cur.execute('SELECT * FROM weldingprocesscontrolrecord WHERE productid="%s" AND released=0;' % productid)
-    weldingprocesscontrolrecord = cur.fetchone()
+    
+    cur.execute('SELECT * FROM WeldingRecord WHERE productid="%s" AND released=0;' % productid)
+    weldingrecord = cur.fetchone()
+    
     cur.execute('SELECT * FROM MQCP WHERE productid="%s" AND released=1 ORDER BY version DESC;'%productid)
     mqcps = cur.fetchall()
+    
     cur.execute('SELECT * FROM ProcessCard WHERE productid="%s" AND released=1 ORDER BY version DESC;'%productid)
     processcards = cur.fetchall()
+    
     cur.execute('SELECT * FROM RecordForm WHERE productid="%s" AND released=1 ORDER BY version DESC;'%productid)
     recordforms = cur.fetchall()
+    
     cur.execute('SELECT * FROM WorkInstruction WHERE productid="%s" AND released=1 ORDER BY version DESC;'%productid)
     workinstructions = cur.fetchall()
-    cur.execute('SELECT * FROM weldingprocesscontrolrecord WHERE productid="%s" AND released=1 ORDER BY version DESC;' % productid)
-    weldingprocesscontrolrecords = cur.fetchall()
-    return render_template("product.html", product=product, next=next, edit=False, mqcp=mqcp, processcard=processcard, recordform=recordform, workinstruction=workinstruction, weldingprocesscontrolrecord=weldingprocesscontrolrecord, mqcps=mqcps, processcards=processcards, recordforms=recordforms, workinstructions=workinstructions,weldingprocesscontrolrecords=weldingprocesscontrolrecords)
+    
+    cur.execute('SELECT * FROM WeldingRecord WHERE productid="%s" AND released=1 ORDER BY version DESC;' % productid)
+    weldingrecords = cur.fetchall()
+    
+    return render_template("product.html", product=product, next=next, edit=False, mqcp=mqcp, processcard=processcard, recordform=recordform, workinstruction=workinstruction, WeldingRecord=WeldingRecord, mqcps=mqcps, processcards=processcards, recordforms=recordforms, workinstructions=workinstructions,weldingrecords=weldingrecords)
 

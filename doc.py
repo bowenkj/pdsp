@@ -523,6 +523,6 @@ def doc_WeldingRecord_route():
 		infos.append(info)
 		# print info
 		op += 1
-	cur.execute('SELECT * FROM WeldingRecordInfo WHERE docid="%s" ORDER BY id ASC;'%docid)
+	cur.execute('SELECT version, filename FROM WeldingRecord WHERE productid="%s" AND released=1;'%productid)
 	select = cur.fetchall()
-	return render_template("workinstruction.html", filename=filename, infos=infos, len=op, edit=not edit, select=select, copy=len(select), close=0)
+	return render_template("weldingrecord.html", filename=filename, infos=infos, len=op, edit=not edit, select=select, copy=len(select), close=0)
