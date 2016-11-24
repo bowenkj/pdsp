@@ -389,7 +389,84 @@ def doc_workinstruction_route():
 		op+=1
 	cur.execute('SELECT version, filename FROM WorkInstruction WHERE productid="%s" AND released=1;'%productid)
 	select=cur.fetchall()
+	#print "reach workinstrcution!--------------------------------"
+	#for i in infos:
+	#	print infos[i]
+	#print len(infos)
 	return render_template("workinstruction.html", filename=filename, infos=infos, len=op, edit=not edit, select=select, copy=len(select), close=0)
+
+@doc.route('/doc/weldingrecord', methods=['GET','POST'])
+@login_required
+def doc_weldingrecord_route():
+	productid=request.args.get('id')
+	version=request.args.get('version')
+	cur = mysql.connection.cursor()
+	if version=="new":
+		cur.execute('SELECT * FROM WeldingRecord WHERE productid="%s" AND released=0;'%productid)
+		if cur.fetchone() is not None:
+			flash("In progress welding process control record exists!", "error")
+			return redirect("/product?id=%s&next="%productid)
+		cur.execute('INSERT INTO WeldingRecord (productid, filename) VALUES (%s, "Untitled WeldingRecord");'%productid)
+		mysql.connection.commit()
+		cur.execute('SELECT version FROM WeldingRecord WHERE productid=%s ORDER BY version DESC;'%productid)
+		version=str(cur.fetchone()[0])
+		#print version
+		return redirect("/doc/weldingrecord?id=%s&version=%s"%(productid,version))
+	docid=productid+' '+version
+	if request.method=="POST":
+		cur.execute('DELETE FROM WeldingRecordInfo WHERE docid="%s";'%docid)
+		submit=request.form.get('submit')
+		if submit=="Copy":
+			oldversion=request.form.get('version')
+			olddocid=productid+' '+oldversion
+			cur.execute('SELECT id FROM WeldingRecordInfo ORDER BY id DESC;')
+			maxid=cur.fetchone()[0]
+			cur.execute('INSERT INTO WeldingRecordInfo (num,part,welder,material,preparation,cur,voltage,speed,height,result,productid) SELECT num,part,welder,material,preparation,cur,voltage,speed,height,result,productid FROM MQCPInfo WHERE docid="%s";'%olddocid)
+			cur.execute('UPDATE WeldingRecordInfo SET docid="%s" WHERE id>%s;'%(docid,maxid))
+			mysql.connection.commit()
+		else:
+			filename=request.form.get('filename')
+			if filename=="":
+				filename="Untitled welding record"
+			num=0
+			for op in request.form.getlist('ops'):
+				num+=1
+				part=request.form.get('parts[%s]'%op)
+				welder=request.form.get('welder[%s]'%op)
+				material=request.form.get('material[%s]'%op)
+				preparation=request.form.get('preparation[%s]'%op)
+				cur = request.form.get('current[%s]' % op)
+				voltage = request.form.get('voltage[%s]' % op)
+				speed = request.form.get('speed[%s]' % op)
+				height = request.form.get('height[%s]' % op)
+				result = request.form.get('result[%s]' % op)
+				cur.execute('INSERT INTO WeldingRecordInfo (docid,num,part,welder,material,preparation,cur,voltage,speed,height,result,productid)  VALUES("%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s");'%(docid,num,part,welder,material,preparation,cur,voltage,speed,height,result,productid))
+			cur.execute('UPDATE WeldingRecord SET filename="%s" WHERE productid="%s" AND version="%s";'%(filename, productid, version))
+			mysql.connection.commit()
+			if submit!="Save":
+				return render_template("WeldingRecord.html", infos=[], len=0, lines=[], edit=True, select=[], copy=0, close=1)
+	cur.execute('SELECT released, filename FROM WeldingRecord WHERE productid="%s" AND version="%s";'%(productid,version))
+	tmp=cur.fetchone()
+	if not tmp:
+		return render_template('404.html'), 404
+	edit = tmp[0]
+	filename = tmp[1]
+	cur.execute('SELECT * FROM WeldingRecordInfo WHERE docid="%s" ORDER BY id ASC;' % docid)
+	tmp = cur.fetchall()
+	op = 0
+	infos = []
+	for info in tmp:
+		info += (op,)
+		infos.append(info)
+		# print info
+		op += 1
+	cur.execute('SELECT version, filename FROM WeldingRecord WHERE productid="%s" AND released=1;'%productid)
+	select = cur.fetchall()
+	#print "reach here!--------------------------------"
+	for i in infos:
+		print infos[i]
+	return render_template("weldingrecord.html", filename=filename, infos=infos, len=op, edit=not edit, select=select, copy=len(select), close=0)
+
 
 
 @doc.route('/doc/tooling', methods=['GET','POST'])
@@ -457,3 +534,4 @@ def doc_equipment_route():
 		#print info
 		op+=1
 	return render_template("equipment.html", infos=infos, len=op, close=0)
+
