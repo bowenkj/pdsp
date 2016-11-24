@@ -1,0 +1,203 @@
+
+<div style="width:4000px;overflow:auto">
+{% if edit: %}
+Enable/Disable Autosave <input type="checkbox" checked onclick="disable(this)">
+<p id="autosave">Auto save in 60s ...</p>
+{% if copy>0: %}
+<form method="post">
+	Copy from
+	<select name="version">
+		{% for each in select: %}
+  		<option value="{{each[0]}}">{{each[1]}} {{each[0]}}</option>
+  		{% endfor %}
+	</select>
+	<input type="submit" name="submit" value="Copy">
+</form>
+
+{% endif %}
+<form method="post">
+<input type="text" name="filename" value="{{filename}}" style="font-size:1.25em;">
+<p></p>
+<table id="table" border="1">
+<tr>
+	<th rowspan="2">Insert Op.</th>
+	<th rowspan="2">Delete Op.</th>
+	<th rowspan="2">Part No.</th>
+	<th rowspan="2">Welder Code</th>
+	<th rowspan="2">Welding material class/lot No.</th>
+	<th rowspan="2">Inspection of Weld Seam Preparations</th>
+	<th rowspan="2">Welding current(A)</th>
+	<th rowspan="2">Welding voltage(V)</th>
+	<th rowspan="2">Welding speed(cm/min)</th>
+	<th rowspan="2">Actually measured welding height</th>
+	<th rowspan="2">Inspecting Result</th>
+</tr>
+	{% if infos: %}
+		{% for info in infos: %}
+		<tr id="Op{{info[8]}}">
+			<td><input type="button" value="+" onclick="addOp({{info[10]}})"></td>
+			{% if info[8]!=0: %}
+			<td><input type="button" value="-" onclick="deleteOp({{info[10]}})"></td>
+			{% else: %}
+			<td></td>
+			{% endif %}
+			<td><textarea name="part[{{info[10]}}]">{{info[2]}}</textarea></td>
+			<td><textarea name="welder[{{info[10]}}]">{{info[3]}}</textarea></td>
+			<td><textarea name="material[{{info[10]}}]">{{info[4]}}</textarea></td>
+			<td><input type = "checkbox" name="preparation[{{info[10]}}]">Yes</td>
+			<td><textarea name="current[{{info[10]}}]">24A</textarea></td>
+			<td><textarea name="voltage[{{info[10]}}]">30V</textarea></td>
+			<td><textarea name="speed[{{info[10]}}]">{{info[8]}}</textarea></td>
+			<td><select name="height[{{info[10]}}]">
+				<option value = "a1">a1</option>
+				<option value = "a2">a2</option>
+				<option value = "a3">a3</option>
+				<option value = "a4">a4</option>
+				<option value = "a5" selected>a5</option>
+				<option value = "a6">a6</option></select></td>
+			<td><input type = "checkbox" name="result[{{info[8]}}]">Yes</td>
+			<input type="hidden" name="ops" value={{info[8]}}>
+		</tr>
+		{% endfor %}
+	{% else: %}
+		<tr id="Op0">
+			<td><input type="button" value="+" onclick="addOp(0)"></td>
+			<td></td>
+			<td><textarea name="part[0]"></textarea></td>
+			<td><textarea name="welder[0]"></textarea></td>
+			<td><textarea name="material[0]"></textarea></td>
+			<td><input type = "checkbox" name="preparation[0]">Yes</td>
+			<td><textarea name="current[0]">24A</textarea></td>
+			<td><textarea name="voltage[0]">30V</textarea></td>
+			<td><textarea name="speed[0]"></textarea></td>
+			<td><select name="height[0]">
+				<option value = "a1">a1</option>
+				<option value = "a2">a2</option>
+				<option value = "a3">a3</option>
+				<option value = "a4">a4</option>
+				<option value = "a5" selected>a5</option>
+				<option value = "a6">a6</option></select></td>
+			<td><input type = "checkbox" name="result[0]">Yes</td>
+			<input type="hidden" name="ops" value=0>
+		</tr>
+	{% endif %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'weldingform')" value="Export to Excel">
+<input id="save" type="submit" name="submit" value="Save">
+<input type="submit" name="submit" value="Save and Close">
+</form>
+{% else: %}
+<h2>{{filename}}</h2>
+<p></p>
+<table id="table" border="1">
+<tr>
+	<th>Part No.</th>
+	<th>Welder Code</th>
+	<th>Welding material class/lot No.</th>
+	<th>Inspection of Weld Seam Preparations</th>
+	<th>Welding current(A)</th>
+	<th>Welding voltage(V)</th>
+	<th>Welding speed(cm/min)</th>
+	<th>Actually measured welding height</th>
+	<th>Inspecting Result</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[8]}}">
+		<td>{{info[2]}}</td>
+		<td>{{info[3]}}</td>
+		<td>{{info[4]}}</td>
+		<td>{{info[5]}}</td>
+		<td>{{info[6]}}</td>
+		<td>{{info[7]}}</td>
+		<td>{{info[8]}}</td>
+		<td>{{info[9]}}</td>
+		<td>{{info[10]}}</td>
+	</tr>
+	{% endfor %}
+</table>
+<a id="dlink"  style="display:none;"></a>
+<input type="button" onclick="tableToExcel('tablename', 'weldingrecord')" value="Export to Excel">
+{% endif %}
+</div>
+
+<table hidden id="export" border="1">
+<tr>
+	<th>Part No.</th>
+	<th>Welder Code</th>
+	<th>Welding material class/lot No.</th>
+	<th>Inspection of Weld Seam Preparations</th>
+	<th>Welding current(A)</th>
+	<th>Welding voltage(V)</th>
+	<th>Welding speed(cm/min)</th>
+	<th>Actually measured welding height</th>
+	<th>Inspecting Result</th>
+</tr>
+	{% for info in infos: %}
+	<tr id="Op{{info[10]}}">
+		<td>{{info[2]}}</td>
+		<td>{{info[3]}}</td>
+		<td>{{info[4]}}</td>
+		<td>{{info[5]}}</td>
+		<td>{{info[6]}}</td>
+		<td>{{info[7]}}</td>
+		<td>{{info[8]}}</td>
+		<td>{{info[9]}}</td>
+		<td>{{info[10]}}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+<script>
+document.write(location.href)；
+var counter = {{len}};
+var time = 60;
+var autosave = 1;
+window.onload=function() {
+	if ({{close}}) window.close();
+	{% if edit: %} setInterval(tip, 1000); {% endif %}
+}
+function disable(element){
+	if (element.checked) {
+		autosave = 1;
+		time = 60;
+	}
+	else autosave = 0;
+}
+function tip(){
+	if (autosave){
+	time -= 1;
+	document.getElementById("autosave").innerHTML='Auto save in '+time+'s ...';
+	if (time==0) document.getElementById("save").click();
+	}
+	else document.getElementById("autosave").innerHTML='';
+}
+function addOp(ops) {
+	counter+=1;
+	var id='Op'+ops;
+	var orow=document.getElementById(id);
+	var nrow=document.getElementById('table').insertRow(orow.rowIndex+1);
+	nrow.id='Op'+counter;
+	nrow.innerHTML='<td><input type="button" value="+" onclick="addOp('+counter+')"></td><td><input type="button" value="-" onclick="deleteOp('+counter+')"></td><td><textarea name="no['+counter+']"></textarea></td><td><textarea name="content['+counter+']" rows="5" cols="35"></textarea></td><td><textarea name="drawing['+counter+']"></textarea></td><td><textarea name="data['+counter+']" rows="5" cols="20"></textarea></td><td><textarea name="others['+counter+']" rows="5" cols="20"></textarea></td><input type="hidden" name="ops" value='+counter+'>';
+}
+function deleteOp(ops) {
+	var rowindex = document.getElementById('Op'+ops).rowIndex
+	document.getElementById('table').deleteRow(rowindex);
+}
+//Export to Excel
+var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><?xml version="1.0" encoding="UTF-8" standalone="yes"?><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>table,td {border:thin solid black}table{border-collapse:collapse}</style></head><body><table>{table}</table></body></html>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById("export")
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            document.getElementById("dlink").href = uri + base64(format(template, ctx));
+            var filename = "{{filename}}" + '.xls';
+            document.getElementById("dlink").download = filename;
+            document.getElementById("dlink").click();
+
+        }
+    })()
+</script>

@@ -185,7 +185,10 @@
             <li><a href="#ProcessCard" data-toggle="tab">Process Card</a></li>
             <li><a href="#RecordForm" data-toggle="tab">Record Form</a></li>
             <li><a href="#WorkInstruction" data-toggle="tab">Work Instruction</a></li>
+            <li><a href="#WeldingRecord" data-toggle="tab">Welding Record</a></li>
             </ul>
+            
+            
             <div id="myTabContent" class="tab-content">
                 <div class="tab-pane fade in active" id="MQCP">
                     <table>
@@ -226,6 +229,8 @@
                         {% endfor %}
                     </table>
                 </div>
+                
+                
                 <div class="tab-pane fade" id="ProcessCard">
                     <table>
                         <tr>
@@ -265,6 +270,8 @@
                         {% endfor %}
                     </table>
                 </div>
+                
+                
                 <div class="tab-pane fade" id="RecordForm">
                     <table>
                         <tr>
@@ -304,6 +311,8 @@
                         {% endfor %}
                     </table>
                 </div>
+                
+                
                 <div class="tab-pane fade" id="WorkInstruction">
                     <table>
                         <tr>
@@ -343,6 +352,46 @@
                         {% endfor %}
                     </table>
                 </div>
+                
+                <div class="tab-pane fade" id="WeldingRecord">
+                    <table>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Version</th>
+                            <th>Status</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr id="wrupdate">
+                            {% if weldingrecord is none: %}
+                            <td><a href="/doc/weldingrecord?id={{product[0]}}&version=new" target="_blank">new</a></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            {% else: %}
+                            <td><a href='/doc/weldingrecord?id={{product[0]}}&version={{weldingrecord[1]}}' target="_blank">{{weldingrecord[4]}}</a></td>
+                            <td>{{weldingrecord[1]}}</td>
+                            <td>In Progress</td>
+                            <td><a href='/product/release?id={{product[0]}}&version={{weldingrecord[1]}}&db=WeldingRecord&next={{next}}' class="button" id="op">release</a></td>
+                            <td><a href='/product/delete?id={{product[0]}}&version={{weldingrecord[1]}}&db=WeldingRecord&next={{next}}' class="button" id="op">delete</a></td>
+                            {% endif %}
+                        </tr>
+                        {% for each in weldingrecords: %}
+                            <tr>
+                                <td><a href='/doc/weldingrecord?id={{product[0]}}&version={{each[1]}}' target="_blank">{{each[4]}}</a></td>
+                                <td>{{each[1]}}</td>
+                                {% if each[2] == 0: %}
+                                <td>Released</td>
+                                {% else: %}
+                                <td>Current Version</td>
+                                {% endif %}
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
             </div>
     {% endif %}
 <style>
@@ -364,22 +413,31 @@ function update() {
         url: "/_updateFilename?id={{product[0]}}",
         success: function(msg) {
             var info = msg["INFO"];
+            
             var mqcpUpdate = document.getElementById('mqcpupdate');
             var mqcp = info["mqcp"]
             if (mqcp) {mqcpUpdate.innerHTML='<td><a href="/doc/mqcp?id={{product[0]}}&version='+mqcp[1]+'" target="_blank">'+mqcp[0]+'</a></td><td>'+mqcp[1]+'</td><td>In Progress</td><td><a href="/product/release?id={{product[0]}}&version='+mqcp[1]+'&db=MQCP&next={{next}}" class="button" id="op">release</a></td><td><a href="/product/delete?id={{product[0]}}&version='+mqcp[1]+'&db=MQCP&next={{next}}" class="button" id="op">delete</a></td>'}
             else {mqcpUpdate.innerHTML='<td><a href="/doc/mqcp?id={{product[0]}}&version=new" target="_blank">new</a></td><td></td><td></td><td></td><td></td>'}
+            
             var pcUpdate = document.getElementById('pcupdate');
             var pc = info["processcard"]
             if (pc) {pcUpdate.innerHTML='<td><a href="/doc/processcard?id={{product[0]}}&version='+pc[1]+'" target="_blank">'+pc[0]+'</a></td><td>'+pc[1]+'</td><td>In Progress</td><td><a href="/product/release?id={{product[0]}}&version='+pc[1]+'&db=ProcessCard&next={{next}}" class="button" id="op">release</a></td><td><a href="/product/delete?id={{product[0]}}&version='+pc[1]+'&db=ProcessCard&next={{next}}" class="button" id="op">delete</a></td>'}
             else {pcUpdate.innerHTML='<td><a href="/doc/processcard?id={{product[0]}}&version=new" target="_blank">new</a></td><td></td><td></td><td></td><td></td>'}
+            
             var rfUpdate = document.getElementById('rfupdate');
             var rf = info["recordform"]
             if (rf) {rfUpdate.innerHTML='<td><a href="/doc/recordform?id={{product[0]}}&version='+rf[1]+'" target="_blank">'+rf[0]+'</a></td><td>'+rf[1]+'</td><td>In Progress</td><td><a href="/product/release?id={{product[0]}}&version='+rf[1]+'&db=RecordForm&next={{next}}" class="button" id="op">release</a></td><td><a href="/product/delete?id={{product[0]}}&version='+rf[1]+'&db=RecordForm&next={{next}}" class="button" id="op">delete</a></td>'}
             else {rfUpdate.innerHTML='<td><a href="/doc/recordform?id={{product[0]}}&version=new" target="_blank">new</a></td><td></td><td></td><td></td><td></td>'}
+            
             var wiUpdate = document.getElementById('wiupdate');
             var wi = info["workinstruction"]
             if (wi) {wiUpdate.innerHTML='<td><a href="/doc/workinstruction?id={{product[0]}}&version='+wi[1]+'" target="_blank">'+wi[0]+'</a></td><td>'+wi[1]+'</td><td>In Progress</td><td><a href="/product/release?id={{product[0]}}&version='+wi[1]+'&db=WorkInstruction&next={{next}}" class="button" id="op">release</a></td><td><a href="/product/delete?id={{product[0]}}&version='+wi[1]+'&db=WorkInstruction&next={{next}}" class="button" id="op">delete</a></td>'}
             else {wiUpdate.innerHTML='<td><a href="/doc/workinstruction?id={{product[0]}}&version=new" target="_blank">new</a></td><td></td><td></td><td></td><td></td>'}
+            
+            var wrUpdate = document.getElementById('wrupdate');
+            var wr = info["weldingrecord"]
+            if (wr) {wrUpdate.innerHTML='<td><a href="/doc/weldingrecord?id={{product[0]}}&version='+wr[1]+'" target="_blank">'+wr[0]+'</a></td><td>'+wr[1]+'</td><td>In Progress</td><td><a href="/product/release?id={{product[0]}}&version='+wr[1]+'&db=WeldingRecord&next={{next}}" class="button" id="op">release</a></td><td><a href="/product/delete?id={{product[0]}}&version='+wi[1]+'&db=WeldingRecord&next={{next}}" class="button" id="op">delete</a></td>'}
+            else {wrUpdate.innerHTML='<td><a href="/doc/weldingrecord?id={{product[0]}}&version=new" target="_blank">new</a></td><td></td><td></td><td></td><td></td>'}
            
         }
     })
