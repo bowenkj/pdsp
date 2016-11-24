@@ -13,6 +13,8 @@ DROP TABLE IF EXISTS RecordFormInfo;
 DROP TABLE IF EXISTS RecordForm;
 DROP TABLE IF EXISTS WorkInstructionInfo;
 DROP TABLE IF EXISTS WorkInstruction;
+DROP TABLE IF EXISTS WeldingRecordInfo;
+DROP TABLE IF EXISTS WeldingRecord;
 DROP TABLE IF EXISTS MQCPInfo;
 DROP TABLE IF EXISTS MQCP;
 DROP TABLE IF EXISTS ProcessCardInfo;
@@ -137,6 +139,33 @@ content VARCHAR(255),
 drawing VARCHAR(255),
 data VARCHAR(255),
 others VARCHAR(255),
+productid INT,
+FOREIGN KEY (productid) REFERENCES Product(productid) ON DELETE CASCADE
+);
+
+CREATE TABLE WeldingRecord(
+productid INT,
+version TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+current Boolean DEFAULT 0,
+released Boolean DEFAULT 0,
+filename VARCHAR(255),
+PRIMARY KEY (productid,version),
+FOREIGN KEY (productid) REFERENCES Product(productid) ON DELETE CASCADE
+);
+
+CREATE TABLE WeldingRecordInfo(
+id INT PRIMARY KEY AUTO_INCREMENT,
+docid VARCHAR(255),
+num INT,
+part VARCHAR(255),
+welder VARCHAR(255),
+material VARCHAR(255),
+preparation INT,
+cur INT,
+voltage INT,
+speed INT,
+height VARCHAR(255),
+result INT,
 productid INT,
 FOREIGN KEY (productid) REFERENCES Product(productid) ON DELETE CASCADE
 );
